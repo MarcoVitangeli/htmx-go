@@ -30,18 +30,15 @@
                 {{range .todos}}
                     <li id="l{{.ID}}">
                         <article>
-                            <label for="check">
-                                <input 
-                                    name="check"
-                                    type="checkbox" 
-                                    {{.Status}}
-                                    hx-trigger=""
-                                    hx-put="/todo/{{.ID}}/complete/{{.Status}}"
-                                    hx-target="#l{{.ID}}"
-                                    hx-swap="outerHTML">
-                                {{.Title}}
-                            </label>
+                            <h3>{{.Title}}</h3>
                             <p>{{.Content}}</p>
+                            <footer>
+                                <span 
+                                    role="button"
+                                    hx-delete="/todo/{{.ID}}"
+                                    hx-target="#l{{.ID}}"
+                                    hx-swap="outerHTML">Delete</span>
+                            </footer>
                         </article>
                     </li>
                 {{end}}

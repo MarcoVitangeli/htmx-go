@@ -1,16 +1,13 @@
 <li id="l{{.todo.ID}}">
     <article>
-        <label for="check">
-            <input 
-                name="check"
-                type="checkbox" 
-                {{.todo.Status}}
-                hx-trigger="click"
-                hx-put="/todo/{{.todo.ID}}/complete/{{.todo.Status}}"
-                hx-target="#l{{.todo.ID}}"
-                hx-swap="outerHTML">
-            {{.todo.Title}}
-        </label>
+        <h3>{{.todo.Title}}</h3>
         <p>{{.todo.Content}}</p>
+        <footer>
+            <span 
+                role="button"
+                hx-delete="/todo/{{.todo.ID}}"
+                hx-target="#l{{.todo.ID}}"
+                hx-swap="outerHTML">Delete</span>
+        </footer>
     </article>
 </li>
