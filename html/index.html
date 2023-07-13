@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>HTMX with Go at {{.timestamp}}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="css/pico.min.css">
+        <script src="https://unpkg.com/htmx.org@1.9.2" integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h" crossorigin="anonymous"></script>
+        <style>
+            h1 {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="container">
+            <header>
+                <h1>Yet another TODO app</h1>
+            </header>
+            <form>
+                <label for="title">
+                    <input type="text" name="title" placeholder="title of your TODO" required>
+                </label>
+                <label for="description">
+                    <input type="text" name="description" placeholder="description of your TODO" required>
+                </label>
+                <button type="submit" class="primary">Add TODO</button>
+            </form>
+        </main>
+    </body>
+</html>
