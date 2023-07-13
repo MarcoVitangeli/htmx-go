@@ -38,7 +38,28 @@ func main() {
 		})
 	})
 
+	r.POST("/todo", func(ctx *gin.Context) {
+		title := ctx.Request.FormValue("title")
+		desc := ctx.Request.FormValue("description")
+
+		createTODO(db, title, desc)
+
+		todos := getTodos(db)
+		ctx.HTML(http.StatusOK, "todos.html", gin.H{
+			"todos": todos,
+		})
+	})
+
 	r.Run(":8080")
+}
+
+func createTODO(db *sql.DB, title, desc string) {
+	_, err := db.Exec("INSERT INTO todos (title, content) VALUES (?,?)", title, desc)
+	if err != nil {
+		log.Printf("error inserting TODO: %s", err)
+	} else {
+		log.Println("success when inserting TODO")
+	}
 }
 
 func getTodos(db *sql.DB) []TODO {

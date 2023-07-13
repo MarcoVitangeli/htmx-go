@@ -17,7 +17,7 @@
             <header>
                 <h1>Yet another TODO app</h1>
             </header>
-            <form>
+            <form hx-post="/todo" hx-triger="submit" hx-target="#list" hx-swap="outerHTML">
                 <label for="title">
                     <input type="text" name="title" placeholder="title of your TODO" required>
                 </label>
@@ -28,12 +28,12 @@
             </form>
             <ul id="list">
                 {{range .todos}}
-                    <li>
-                        <article>
-                            <h3>{{.Title}}</h3>
-                            <p>{{.Content}}</p>
-                        </article>
-                    </li>
+                <li>
+                    <article>
+                        <h3>{{.Title}}</h3>
+                        <p>{{.Content}}</p>
+                    </article>
+                </li>
                 {{end}}
             </ul>
         </main>
