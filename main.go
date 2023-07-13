@@ -11,8 +11,10 @@ import (
 )
 
 type TODO struct {
+	ID      int
 	Title   string
 	Content string
+	Status  string
 }
 
 func main() {
@@ -20,7 +22,6 @@ func main() {
 	r.Use(gin.Logger())
 
 	r.LoadHTMLGlob("./html/*.html")
-	r.StaticFile("css/pico.min.css", "./pico-1.5.9/css/pico.min.css")
 
 	db, err := sql.Open("sqlite3", "file::memory:")
 	if err != nil {
@@ -50,7 +51,81 @@ func main() {
 		})
 	})
 
+	r.PUT("/todo/:id/complete/:status", func(ctx *gin.Context) {
+		status := ctx.Param("status")
+		log.Printf("STATUS\n\n%s\n\n", status)
+		todo, hasErr := getByID(db, ctx.Param("id"))
+		if hasErr {
+			ctx.HTML(http.StatusNotFound, "todo.html", gin.H{
+				"todo": todo,
+			})
+			return
+		}
+
+		// toggle status
+		if status == "checked" {
+			status = "pending"
+		} else {
+			status = "checked"
+		}
+		todo.Status = status
+
+		updateTODO(db, todo)
+		log.Println(todo)
+
+		ctx.HTML(http.StatusOK, "todo.html", gin.H{
+			"todo": todo,
+		})
+	})
+
 	r.Run(":8080")
+}
+
+func updateTODO(db *sql.DB, todo TODO) {
+	var cmp int
+	if todo.Status == "checked" {
+		cmp = 1
+	}
+	_, err := db.Exec(`UPDATE todos
+	SET title = ?,
+	content = ?,
+	completed = ?
+	WHERE rowid = ?
+	`, todo.Title, todo.Content, cmp, todo.ID)
+
+	if err != nil {
+		log.Printf("error updating todo: %s", err)
+	}
+}
+
+func getByID(db *sql.DB, id string) (TODO, bool) {
+	log.Println("ID TO PRINT", id)
+	var (
+		idVal     int
+		title     string
+		content   string
+		completed int
+		cmpStr    string
+	)
+	err := db.QueryRow("SELECT rowid, title, content, completed FROM todos WHERE rowid = ?", id).
+		Scan(&idVal, &title, &content, &completed)
+	if err != nil {
+		log.Printf("error getting todo: %s", err)
+		return TODO{}, true
+	}
+
+	if completed > 0 {
+		cmpStr = "checked"
+	} else {
+		cmpStr = "pending"
+	}
+
+	return TODO{
+		ID:      idVal,
+		Title:   title,
+		Content: content,
+		Status:  cmpStr,
+	}, false
 }
 
 func createTODO(db *sql.DB, title, desc string) {
@@ -65,16 +140,25 @@ func createTODO(db *sql.DB, title, desc string) {
 func getTodos(db *sql.DB) []TODO {
 	var todos []TODO
 
-	rows, err := db.Query("SELECT title, content FROM todos")
+	rows, err := db.Query("SELECT rowid, title, content, completed FROM todos")
 	if err != nil {
 		return todos
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var todo TODO
-		if err := rows.Scan(&todo.Title, &todo.Content); err != nil {
+		var (
+			todo TODO
+			cmp  int
+		)
+		if err := rows.Scan(&todo.ID, &todo.Title, &todo.Content, &cmp); err != nil {
 			continue
+		}
+		if cmp != 0 {
+			log.Printf("checked todo: %s, %s", todo.Title, todo.Content)
+			todo.Status = "checked"
+		} else {
+			todo.Status = "pending"
 		}
 		todos = append(todos, todo)
 	}
@@ -83,14 +167,14 @@ func getTodos(db *sql.DB) []TODO {
 }
 
 func createDatabase(db *sql.DB) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS todos (title TEXT NOT NULL, content TEXT NOT NULL);")
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS todos (title TEXT NOT NULL, content TEXT NOT NULL, completed INT DEFAULT 0);")
 	if err != nil {
 		log.Fatalf("error creating table: %s", err)
 	}
-	_, err = db.Exec(`INSERT INTO todos (title, content) VALUES
-	("title one", "content 1"),
-	("title two", "content 2"),
-	("title three", "content three");`)
+	_, err = db.Exec(`INSERT INTO todos (title, content, completed) VALUES
+	("title one", "content 1", 0),
+	("title two", "content 2", 1),
+	("title three", "content three", 0);`)
 	if err != nil {
 		log.Fatalf("error inserting data: %s", err)
 	}

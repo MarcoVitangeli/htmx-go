@@ -1,10 +1,20 @@
 <ul id="list">
     {{range .todos}}
-    <li>
-        <article>
-            <h3>{{.Title}}</h3>
-            <p>{{.Content}}</p>
-        </article>
-    </li>
+        <li id="l{{.ID}}">
+            <article>
+                <label for="check">
+                    <input 
+                        name="check"
+                        type="checkbox" 
+                        {{.Status}}
+                        hx-trigger="click"
+                        hx-put="/todo/{{.ID}}/complete/{{.Status}}"
+                        hx-target="#l{{.ID}}"
+                        hx-swap="outerHTML">
+                    {{.Title}}
+                </label>
+                <p>{{.Content}}</p>
+            </article>
+        </li>
     {{end}}
 </ul>
