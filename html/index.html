@@ -26,6 +26,16 @@
                 </label>
                 <button type="submit" class="primary">Add TODO</button>
             </form>
+            <ul id="list">
+                {{range .todos}}
+                    <li>
+                        <article>
+                            <h3>{{.Title}}</h3>
+                            <p>{{.Content}}</p>
+                        </article>
+                    </li>
+                {{end}}
+            </ul>
         </main>
     </body>
 </html>
